@@ -1,4 +1,6 @@
-const Student = require("../model/student.Model"); // Import the Student model
+const db = require("../model");
+
+const Student = db.student;
 
 class StudentService {
   async getAllStudent() {
@@ -27,12 +29,36 @@ class StudentService {
   }
   async deleteStudent(id) {
     try {
-      const student = await Student.destroy({ where: { id: id } });
+      const student = await Student.destroy(
+        { where: { id: id } },
+        {
+          include: [
+            {
+              model: db.profile,
+              as: "profile", // Include the associated profiles for cascading delete
+            },
+          ],
+        }
+      );
       const result = await Student.findAll();
-      return result;
+      return student;
     } catch (err) {
       console.log(err);
     }
+  }
+  async getStudentLimit(page, perpage) {
+    try {
+      const offset = (page - 1) * perpage;
+      const users = await Student.findAll({
+        offset,
+        limit: perpage,
+      });
+      return users;
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error fetching users" });
+    }
+    return student;
   }
 }
 module.exports = new StudentService();
