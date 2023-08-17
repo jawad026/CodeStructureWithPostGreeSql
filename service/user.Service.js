@@ -36,6 +36,10 @@ class StudentService {
             model: db.profile,
             as: "profile", // Include the associated profiles for cascading delete
           },
+          {
+            model: db.issue,
+            as: "issues",
+          },
         ],
       });
   
