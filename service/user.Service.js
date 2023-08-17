@@ -29,23 +29,23 @@ class StudentService {
   }
   async deleteStudent(id) {
     try {
-      const student = await Student.destroy(
-        { where: { id: id } },
-        {
-          include: [
-            {
-              model: db.profile,
-              as: "profile", // Include the associated profiles for cascading delete
-            },
-          ],
-        }
-      );
-      const result = await Student.findAll();
+      const student = await Student.destroy({
+        where: { id: id },
+        include: [
+          {
+            model: db.profile,
+            as: "profile", // Include the associated profiles for cascading delete
+          },
+        ],
+      });
+  
       return student;
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      throw err; // Rethrow the error to be caught by the caller
     }
   }
+  
   async getStudentLimit(page, perpage) {
     try {
       const offset = (page - 1) * perpage;

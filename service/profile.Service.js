@@ -1,13 +1,13 @@
-const db=require('../model');
+const db = require("../model");
 
-const Profile=db.profile
-const Student=db.student
+const Profile = db.profile;
+const Student = db.student;
 
 class ProfileService {
   async getAllProfile() {
     try {
       const profiles = await Profile.findAll({
-        include: { model: Student, as: 'student' }
+        include: { model: Student, as: "student" },
       });
       return profiles;
     } catch (err) {
@@ -21,7 +21,7 @@ class ProfileService {
       const student = await Student.findByPk(userId);
 
       if (!student) {
-        return ({ error: "User not found" });
+        return { error: "User not found" };
       }
 
       await student.setProfile(profiles);

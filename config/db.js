@@ -20,16 +20,4 @@ sequelize
     console.error("Unable to connect to the database:", err);
   });
 
-const db = {};
-
-db.Sequelize = Sequelize;
-db.sequelize = sequelize;
-
-db.student = require("../model/student.Model")(sequelize, DataTypes);
-db.profile = require("../model/profile.Model")(sequelize, DataTypes);
-
-db.sequelize.sync({ force: false }).then(() => {
-  console.log("yes re-sync done!");
-});
-
-module.exports = db;
+module.exports = sequelize;
