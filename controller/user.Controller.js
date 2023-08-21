@@ -1,56 +1,45 @@
 const {
-  getAllStudent,
-  createStudent,
-  updateStudent,
-  deleteStudent,
-  getStudentLimit,
+  loginUser,
+  logoutUser,
+  registerUser,
 } = require("../service/user.Service");
 
-class StudentController {
-  async getAllStudents(req, res) {
-    try {
-      const result = await getAllStudent();
-      res.json(result);
-    } catch (error) {
-      console.log(error);
-    }
+class userController {
+  async loginUser(req, res, next) {
+    loginUser(req, res, next);
   }
-  async createStudents(req, res) {
-    try {
-      console.log(req.body);
-      const result = await createStudent(req.body);
-      res.json(result);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async updateStudents(req, res) {
-    try {
-      const result = await updateStudent(req.body, req.params.id);
-      res.json(result);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async deleteStudents(req, res) {
-    try {
-      const result = await deleteStudent(req.params.id);
-      res.json(result);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  async getStudentByLimit(req, res, next) {
-    try {
-      const page = parseInt(req.query.page) || 1; // Get the page number from query parameters
-      const perPage = parseInt(req.query.perPage) || 10; // Get the number of items per page from query parameters
 
-      const result = await getStudentLimit(page, perPage);
-      res.json(result);
+  async logoutUser(req, res, next) {
+    try {
+      // Call the logoutUser function from the AuthService
+      const isLoggedOut = logoutUser(req);
+
+      if (isLoggedOut) {
+        return res.json({ message: "Logout successful" });
+      } else {
+        return res.status(500).json({ message: "Logout failed" });
+      }
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   }
+  async signupUser(req, res, next) {
+    try {
+      const user = await registerUser(req);
+      return res
+        .status(200)
+        .json({
+          success: true,
+          status: "Registration Successful!",
+          user: user,
+        });
+    } catch (err) {
+      console.error("Error during user registration:", err);
+      next(err);
+    }
+  }
+
+  // Additional authentication-related controller functions (e.g., registerUser, forgotPassword, etc.)
 }
 
-module.exports = new StudentController();
+module.exports = new userController();

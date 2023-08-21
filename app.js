@@ -5,12 +5,28 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/users");
-
+const passport = require("passport");
+var session = require("express-session");
+const db = require("./model");
+const User=db.user
 var app = express();
 
+app.use(
+  session({
+    secret: "12345-67890-09876-54321", // Replace with a secret key for session management
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
 
 app.use(logger("dev"));
 app.use(express.json());

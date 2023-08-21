@@ -1,68 +1,71 @@
+const passport = require("passport");
 const db = require("../model");
+const User = db.user; // Adjust the path to your Sequelize User model
+const authenticate = require("../config/passport.config");
 
-const Student = db.student;
+class AuthService {
+  async loginUser(req, res, next) {
+    passport.authenticate('local',(err, user, info) => {
+      console.log(user)
+      if (err) return next(err);
+      if (!user) {
+        return res.status(401).json({
+          success: false,
+          status: "Login Unsuccessful!",
+          err: info,
+        });
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          console.log(user)
+          return res.status(401).json({
+            status: "Login Unsuccessful!",
+            err: err,
+          });
+        }
 
-class StudentService {
-  async getAllStudent() {
-    try {
-      const student = await Student.findAll();
-      return student;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  async createStudent(req) {
-    try {
-      const student = await Student.create(req);
-      return student;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  async updateStudent(req, id) {
-    try {
-      const student = await Student.update(req, { where: { id: id } });
-      return student;
-    } catch (err) {
-      console.log(err);
-    }
-  }
-  async deleteStudent(id) {
-    try {
-      const student = await Student.destroy({
-        where: { id: id },
-        include: [
-          {
-            model: db.profile,
-            as: "profile", // Include the associated profiles for cascading delete
+        const token = authenticate.signToken({ id: req.user.id });
+        return res.status(200).json({
+          success: true,
+          status: "Login Successful!",
+          token: token,
+          user: {
+            email: req.user.email,
           },
-          {
-            model: db.issue,
-            as: "issues",
-          },
-        ],
+        });
       });
-  
-      return student;
+    })(req, res, next);
+  }
+
+  async registerUser(req, res) {
+    try {
+      const newUser = await User.create({
+        email: req.body.email,
+        password:req.body.password
+      });
+
+      req.login(newUser, (err) => {
+        if (err) {
+          console.error("Error during authentication:", err);
+          return res.status(500).json({ err: "Authentication error" });
+        }
+        console.log("User authenticated successfully");
+        return newUser
+      });
     } catch (err) {
-      console.error(err);
-      throw err; // Rethrow the error to be caught by the caller
+      console.error("Error during user registration:", err);
+      return ({ err: err });
     }
   }
-  
-  async getStudentLimit(page, perpage) {
+
+  async logoutUser(req) {
     try {
-      const offset = (page - 1) * perpage;
-      const users = await Student.findAll({
-        offset,
-        limit: perpage,
-      });
-      return users;
+      req.logout(); // Use Passport.js req.logout() to log the user out and clear the session
+      return true; // Indicate that logout was successful
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Error fetching users" });
+      throw error;
     }
-    return student;
   }
 }
-module.exports = new StudentService();
+
+module.exports = new AuthService();
